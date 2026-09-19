@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organic Juices - Order Form</title>
+    <link rel="apple-touch-icon" href="icon.png ">
+
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <style>
+        :root {
+            --page-bg-start: #f5f7fa;
+            --page-bg-end: #c3cfe2;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        html {
+            width: 100%;
+            min-height: 100%;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--page-bg-start) 0%, var(--page-bg-end) 100%);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        #invoice-container {
+            background-color: #ffffff;
+            width: 210mm;
+            max-width: 100%;
+            min-height: 297mm;
+            padding: 12mm 15mm;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .header-section {
+            background: linear-gradient(135deg, #020200 0%, #020100 100%);
+            padding: 12px 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #f9a825;
+            gap: 15px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .logo-frame {
+            width: 92px;
+            height: 92px;
+            border: 2px solid #000;
+            border-radius: 50%;
+            overflow: hidden;
+            background-color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+        }
+
+        .logo {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .header-title {
+            text-align: center;
+            font-weight: 800;
+            font-size: clamp(34px, 6.5vw, 54px);
+            line-height: 1.2;
+            color: #f4f7f4;
+            text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.7);
+            flex: 1;
+        }
+
+        .info-section {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            background-color: rgba(252, 252, 252, 0.9);
+            padding: 15px 20px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            gap: 15px;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.03);
+            position: relative;
+            z-index: 10;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .info-label {
+            font-weight: 800;
+            font-size: clamp(18px, 2.8vw, 22px);
+            color: #222;
+        }
+
+        .info-item input {
+            border: none;
+            border-bottom: 2px dashed #999;
+            font-family: inherit;
+            font-weight: 800;
+            font-size: clamp(19px, 3vw, 24px);
+            outline: none;
+            background: transparent;
+            padding: 4px 10px;
+            color: #1565C0;
+            width: 150px;
+        }
+
+        .info-item .fixed-name {
+            font-weight: 800;
+            font-size: clamp(19px, 3vw, 24px);
+            padding: 4px 10px;
+            color: #000000;
+        }
+
+        .table-wrapper {
+            width: 100%;
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid #111;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.06);
+            background-color: rgba(255, 255, 255, 0.65);
+        }
+
+        .watermark-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .wm-group {
+            transform: rotate(-35deg);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .wm-text {
+            font-weight: 900;
+            font-size: clamp(35px, 6vw, 60px);
+            color: rgba(0, 0, 0, 0.18);
+            font-family: Arial, sans-serif;
+            text-transform: uppercase;
+            line-height: 1;
+            white-space: nowrap;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        th {
+            background: linear-gradient(135deg, #1f1f1f 0%, #000000 100%);
+            color: #ffffff;
+            padding: 16px 10px;
+            font-size: clamp(17px, 2.6vw, 20px);
+            font-weight: 800;
+            border-bottom: 3px solid #111;
+            border-left: 1px solid #444;
+        }
+
+        th:last-child {
+            border-left: none;
+        }
+
+        td {
+            padding: 8px;
+            border-bottom: 1px solid #d5d5d5;
+            border-left: 1px solid #d5d5d5;
+            font-size: clamp(17px, 2.5vw, 19px);
+            font-weight: 700;
+            height: 52px;
+            color: #222;
+            background-color: transparent;
+        }
+
+        td:last-child {
+            border-left: none;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:nth-child(even) td {
+            background-color: rgba(245, 245, 245, 0.4);
+        }
+
+        .custom-item-input {
+            width: 100%;
+            border: none;
+            border-bottom: 2px dashed #bbb;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: clamp(17px, 2.5vw, 21px);
+            outline: none;
+            background: transparent;
+            color: #111;
+            text-align: center;
+            padding: 6px 5px;
+        }
+
+        .custom-item-input:focus {
+            border-bottom: 2px solid #1976D2;
+        }
+
+        .actions-row {
+            display: flex;
+            justify-content: center;
+            margin-top: 25px;
+            gap: 15px;
+        }
+
+        .export-btn,
+        .print-btn {
+            padding: 12px 35px;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .export-btn {
+            background: linear-gradient(135deg, #1976D2 0%, #1565C0 100%);
+            color: white;
+            border: none;
+            box-shadow: 0 8px 15px rgba(25, 118, 210, 0.3);
+        }
+
+        .print-btn {
+            background: #ffffff;
+            color: #111;
+            border: 2px solid #999;
+        }
+
+        .pdf-mode {
+            box-shadow: none !important;
+            border-radius: 0 !important;
+            border: none !important;
+        }
+
+        .pdf-mode .info-section {
+            background-color: transparent !important;
+            border: none !important;
+            padding: 0 !important;
+        }
+
+        .pdf-mode input {
+            border-bottom: none !important;
+            color: #111 !important;
+        }
+
+        .pdf-mode .table-wrapper {
+            border-radius: 0 !important;
+            border: 2px solid #000 !important;
+        }
+
+        .pdf-mode table {
+            border-collapse: collapse !important;
+        }
+
+        .pdf-mode th,
+        .pdf-mode td {
+            border: 1px solid #555 !important;
+        }
+
+        .pdf-mode th {
+            background-color: #000 !important;
+            color: #fff !important;
+        }
+
+        .pdf-mode .wm-text {
+            color: rgba(0, 0, 0, 0.15) !important;
+        }
+
+        @media screen and (max-width: 700px) {
+
+            body {
+                padding: 8px;
+            }
+
+            #invoice-container {
+                width: 100%;
+                min-height: auto;
+                padding: 12px 8px;
+                border-radius: 8px;
+            }
+
+            .header-section {
+                padding: 10px;
+                gap: 8px;
+                margin-bottom: 15px;
+            }
+
+            .logo-frame {
+                width: 62px;
+                height: 62px;
+            }
+
+            .header-title {
+                font-size: clamp(22px, 7vw, 34px);
+            }
+
+            .info-section {
+                padding: 10px;
+                margin-bottom: 15px;
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+
+            .info-item {
+                gap: 5px;
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .info-label {
+                font-size: clamp(15px, 4.5vw, 19px);
+            }
+
+            .info-item .fixed-name,
+            .info-item input {
+                font-size: clamp(16px, 4.5vw, 20px);
+            }
+
+            .info-item input {
+                width: 140px;
+                max-width: 50%;
+            }
+
+            th {
+                padding: 10px 5px;
+                font-size: clamp(13px, 4vw, 17px);
+            }
+
+            td {
+                padding: 5px 3px;
+                height: 45px;
+                font-size: clamp(13px, 4vw, 17px);
+            }
+
+            .custom-item-input {
+                font-size: clamp(13px, 4vw, 17px);
+                padding: 5px 2px;
+            }
+
+            .wm-text {
+                font-size: clamp(24px, 8vw, 40px);
+            }
+
+            .actions-row {
+                width: 100%;
+                flex-direction: column;
+                gap: 10px;
+                margin-top: 15px;
+            }
+
+            .export-btn,
+            .print-btn {
+                width: 100%;
+                padding: 11px 20px;
+                font-size: 16px;
+            }
+        }
+
+        @media screen and (min-width: 701px) and (max-width: 1100px) {
+
+            body {
+                padding: 15px;
+            }
+
+            #invoice-container {
+                width: 100%;
+                padding: 25px;
+            }
+
+            .header-title {
+                font-size: clamp(32px, 6vw, 48px);
+            }
+        }
+
+        @media screen and (max-width: 380px) {
+
+            body {
+                padding: 5px;
+            }
+
+            #invoice-container {
+                padding: 8px 5px;
+            }
+
+            .header-section {
+                padding: 8px 6px;
+            }
+
+            .logo-frame {
+                width: 52px;
+                height: 52px;
+            }
+
+            .header-title {
+                font-size: 20px;
+            }
+
+            .info-item .fixed-name,
+            .info-item input {
+                font-size: 15px;
+            }
+
+            .info-label {
+                font-size: 14px;
+            }
+
+            th {
+                font-size: 12px;
+                padding: 8px 2px;
+            }
+
+            td {
+                font-size: 12px;
+            }
+
+            .custom-item-input {
+                font-size: 12px;
+            }
+
+            .wm-text {
+                font-size: 21px;
+            }
+        }
+
+        @media print {
+
+            @page {
+                size: A4;
+                margin: 0;
+            }
+
+            html,
+            body {
+                background: #ffffff !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            #invoice-container {
+                width: 210mm;
+                min-height: 297mm;
+                padding: 14mm 16mm;
+                border: 2px solid #111 !important;
+                box-shadow: none;
+                border-radius: 0;
+            }
+
+            .header-section {
+                background: #111111 !important;
+                border: 1px solid #111 !important;
+            }
+
+            th {
+                background: #000000 !important;
+                color: white !important;
+            }
+
+            .wm-text {
+                color: rgba(0, 0, 0, 0.15) !important;
+            }
+
+            .actions-row {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="invoice-container">
+
+        <div class="header-section">
+            <div class="logo-frame">
+                <img src="icon-oj.jpg" alt="Logo" class="logo" onerror="this.style.display='none'">
+            </div>
+
+            <div class="header-title">
+                <span>Organic Juices <br> ئورگانيك جويس</span>
+            </div>
+        </div>
+
+        <div class="info-section">
+
+            <div class="info-item">
+                <label class="info-label">ناڤ ونيشان:</label>
+                <span class="fixed-name">صالح يوسف</span>
+            </div>
+
+            <div class="info-item">
+                <label class="info-label">ميژوو:</label>
+                <input type="text" id="cust-date">
+            </div>
+
+        </div>
+
+        <div class="table-wrapper">
+
+            <div class="watermark-layer">
+
+                <div class="wm-group">
+                    <span class="wm-text">Organic Juices</span>
+                    <span class="wm-text">Salih Yousif</span>
+                </div>
+
+                <div class="wm-group">
+                    <span class="wm-text">Organic Juices</span>
+                    <span class="wm-text">Salih Yousif</span>
+                </div>
+
+                <div class="wm-group">
+                    <span class="wm-text">Organic Juices</span>
+                    <span class="wm-text">Salih Yousif</span>
+                </div>
+
+            </div>
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th style="width: 30%;">فيقی</th>
+                        <th style="width: 35%;">هژمار</th>
+                        <th style="width: 35%;">كيلو / صندوق</th>
+                    </tr>
+                </thead>
+
+                <tbody id="table-body"></tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    <div class="actions-row">
+
+        <button class="export-btn" onclick="generatePDF()">
+            تصدير الفاتورة (PDF)
+        </button>
+
+        <button class="print-btn" onclick="window.print()">
+            طباعة
+        </button>
+
+    </div>
+
+    <script>
+        const items = [
+            "اڤوگادوو", "برتقال", "لیمون", "سندی", "هنار", "موز", "سيڤ",
+            "گيزەر", "خوخ", "مانگو", "اناناس", "تیشه مبی", "هیژیر", "فراوله",
+            "حلیک", "زه به ش", "گندور"
+        ];
+
+        function renderTables() {
+            const body = document.getElementById("table-body");
+
+            items.forEach(item => {
+                const tr = document.createElement("tr");
+
+                tr.innerHTML = `
+                    <td class="item-name">${item}</td>
+                    <td><input type="text" class="custom-item-input qty-input"></td>
+                    <td><input type="text" class="custom-item-input note-input"></td>
+                `;
+
+                body.appendChild(tr);
+            });
+        }
+
+        function prefillToday() {
+            const today = new Date();
+
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+
+            document.getElementById("cust-date").value = `${yyyy}-${mm}-${dd}`;
+        }
+
+        renderTables();
+        prefillToday();
+
+        async function generatePDF() {
+
+            const exportBtn = document.querySelector(".export-btn");
+            const element = document.getElementById("invoice-container");
+
+            if (
+                typeof html2canvas === "undefined" ||
+                typeof window.jspdf === "undefined"
+            ) {
+                alert("تکایە دڵنیابەرەوە لە هەبوونی ئینتەرنێت بۆ بارکردنی کتێبخانەی PDF.");
+                return;
+            }
+
+            exportBtn.disabled = true;
+            exportBtn.innerText = "چاوەڕوان بە...";
+
+            element.classList.add("pdf-mode");
+
+            const inputs = element.querySelectorAll('input');
+            const tempSpans = [];
+
+            inputs.forEach(input => {
+
+                const span = document.createElement('span');
+
+                span.className = 'pdf-temp-text';
+                span.textContent = input.value || '';
+                span.style.fontFamily = 'inherit';
+                span.style.fontWeight = 'bold';
+                span.style.fontSize = window.getComputedStyle(input).fontSize;
+                span.style.color = window.getComputedStyle(input).color;
+
+                input.style.display = 'none';
+                input.parentNode.appendChild(span);
+
+                tempSpans.push({ input, span });
+            });
+
+            try {
+
+                if (document.fonts && document.fonts.ready) {
+                    await document.fonts.ready;
+                }
+
+                await new Promise(resolve =>
+                    requestAnimationFrame(() =>
+                        requestAnimationFrame(resolve)
+                    )
+                );
+
+                const canvas = await html2canvas(element, {
+                    scale: 3,
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: "#ffffff",
+                    scrollX: 0,
+                    scrollY: 0
+                });
+
+                const { jsPDF } = window.jspdf;
+
+                const pdf = new jsPDF({
+                    orientation: "portrait",
+                    unit: "mm",
+                    format: "a4"
+                });
+
+                const pageWidth = pdf.internal.pageSize.getWidth();
+                const pageHeight = pdf.internal.pageSize.getHeight();
+
+                const canvasRatio = canvas.height / canvas.width;
+
+                let imgWidth = pageWidth;
+                let imgHeight = imgWidth * canvasRatio;
+
+                if (imgHeight > pageHeight) {
+                    imgHeight = pageHeight;
+                    imgWidth = imgHeight / canvasRatio;
+                }
+
+                const x = (pageWidth - imgWidth) / 2;
+                const y = 0;
+
+                const imageData = canvas.toDataURL("image/jpeg", 0.98);
+
+                pdf.addImage(
+                    imageData,
+                    "JPEG",
+                    x,
+                    y,
+                    imgWidth,
+                    imgHeight
+                );
+
+                pdf.save("Organic-Juices-Order.pdf");
+
+            } catch (error) {
+
+                console.error("PDF Export Error:", error);
+
+                alert("هەڵەیەک ڕووی دا لە کاتی دروستکردنی PDF.");
+
+            } finally {
+
+                tempSpans.forEach(({ input, span }) => {
+
+                    input.style.display = '';
+
+                    if (span.parentNode) {
+                        span.parentNode.removeChild(span);
+                    }
+
+                });
+
+                element.classList.remove("pdf-mode");
+
+                exportBtn.disabled = false;
+
+                exportBtn.innerText = "تصدير الفاتورة (PDF)";
+            }
+        }
+    </script>
+
+</body>
+
+</html>
