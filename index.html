@@ -806,7 +806,6 @@
             });
         }
 
-        /* ينزّل الـ Blob كملف عادي (fallback عندما لا تتوفر مشاركة الملفات) */
         function downloadPdfBlob(blob, fileName) {
             const blobUrl = URL.createObjectURL(blob);
             const link = document.createElement("a");
@@ -820,17 +819,13 @@
             setTimeout(() => URL.revokeObjectURL(blobUrl), 2000);
         }
 
-        /*
-         * يشارك ملف الـPDF فقط عبر Web Share API (بدون أي رابط أو نص).
-         * إن لم يكن الجهاز/المتصفح يدعم مشاركة الملفات، يتم تنزيل الملف مباشرة.
-         */
+
         async function sharePdfFileOnly(blob, fileName) {
             let pdfFile;
 
             try {
                 pdfFile = new File([blob], fileName, { type: "application/pdf" });
             } catch (e) {
-                // بعض المتصفحات القديمة لا تدعم منشئ File بالكامل
                 downloadPdfBlob(blob, fileName);
                 return;
             }
@@ -851,11 +846,9 @@
                         return;
                     }
 
-                    // أي خطأ آخر: نرجع للتنزيل العادي كخطة بديلة
                     downloadPdfBlob(blob, fileName);
                 }
             } else {
-                // الجهاز/المتصفح لا يدعم مشاركة الملفات: تنزيل عادي
                 downloadPdfBlob(blob, fileName);
             }
         }
@@ -882,7 +875,7 @@
 
             if (exportBtn) {
                 exportBtn.disabled = true;
-                exportBtn.textContent = "چاوەڕوان بە...";
+                exportBtn.textContent = " الرجاء الانتظار...";
             }
 
             try {
@@ -954,9 +947,6 @@
 
                 const fileName = "Organic-Juices-Order.pdf";
 
-                // بدلاً من pdf.save() التي تفتح الملف في نافذة معاينة Safari
-                // (وهي سبب ظهور "رابط + مستند" عند المشاركة من هناك)،
-                // نولّد Blob ونتحكم بالمشاركة/التنزيل بأنفسنا.
                 const pdfBlob = pdf.output("blob");
 
                 await sharePdfFileOnly(pdfBlob, fileName);
